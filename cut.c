@@ -303,7 +303,7 @@ static Image *ReadCUTImage(const ImageInfo *image_info,ExceptionInfo *exception)
   ssize_t depth;
   ssize_t i,j;
   ssize_t ldblk;
-  unsigned char *BImgBuff=NULL,*ptrB;
+  unsigned char *k=NULL,*ptrB;
   register Quantum *q;
 
   /*
@@ -502,9 +502,9 @@ static Image *ReadCUTImage(const ImageInfo *image_info,ExceptionInfo *exception)
 
 
   /* ----- Load RLE compressed raster ----- */
-  BImgBuff=(unsigned char *) AcquireQuantumMemory((size_t) ldblk,
-    sizeof(*BImgBuff));  /*Ldblk was set in the check phase*/
-  if(BImgBuff==NULL) goto NoMemory;
+  k=(unsigned char *) AcquireQuantumMemory((size_t) ldblk,
+    sizeof(*k));  /*Ldblk was set in the check phase*/
+  if(k==NULL) goto NoMemory;
 
   offset=SeekBlob(image,6 /*sizeof(Header)*/,SEEK_SET);
   if (offset < 0)
@@ -513,7 +513,7 @@ static Image *ReadCUTImage(const ImageInfo *image_info,ExceptionInfo *exception)
   {
       EncodedByte=ReadBlobLSBShort(image);
 
-      ptrB=BImgBuff;
+      ptrB=k;
       j=ldblk;
 
       RunCount=(unsigned char) ReadBlobByte(image);
@@ -547,7 +547,7 @@ static Image *ReadCUTImage(const ImageInfo *image_info,ExceptionInfo *exception)
           RunCountMasked=RunCount & 0x7F;
         }
 
-      InsertRow(image,depth,BImgBuff,i,exception);
+      InsertRow(image,depth,k,i,exception);
     }
   (void) SyncImage(image,exception);
 
@@ -593,8 +593,8 @@ static Image *ReadCUTImage(const ImageInfo *image_info,ExceptionInfo *exception)
     }
 
  Finish:
-  if (BImgBuff != NULL)
-    BImgBuff=(unsigned char *) RelinquishMagickMemory(BImgBuff);
+  if (k != NULL)
+    k=(unsigned char *) RelinquishMagickMemory(k);
   if (palette != NULL)
     palette=DestroyImage(palette);
   if (clone_info != NULL)
